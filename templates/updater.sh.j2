@@ -1,0 +1,21 @@
+NJALLA_TOKEN="{{njalla_token}}"
+DOMAIN=$( curl -s -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/attributes/njalla_domain )
+DOMAIN_ID=$( curl -s -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/attributes/njalla_domain_id )
+LASTIP_FILE="/tmp/dns_last_ip_$DOMAIN_ID"
+
+current_ip=$(curl http://ipecho.net/plain)
+if [ -f "$LASTIP_FILE" ]; then
+	last_ip=`head -n 1 $LASTIP_FILE`
+else
+	last_ip=""
+fi
+
+if [ "$current_ip" != "$last_ip" ]; then
+    curl -s \
+        -H "Accept: application/json" \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Njalla ${NJALLA_TOKEN}" \
+        --data "{\"method\":\"edit-record\", \"params\": {\"domain\": \"$DOMAIN\", \"id\": $DOMAIN_ID, \"content\": \"$current_ip\"}}" \
+        https://njal.la/api/1/
+	echo $current_ip > $LASTIP_FILE
+fi

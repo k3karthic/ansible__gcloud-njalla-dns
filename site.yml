@@ -1,17 +1,17 @@
 ---
-- name: dynamic dns using njalla
+- name: Dynamic dns using njalla
   hosts: all
   become: true
 
   tasks:
-    - name: install dependencies
+    - name: Install dependencies
       community.general.pkgng:
         name:
           - curl
           - bash
         state: latest
 
-    - name: create updater script
+    - name: Create updater script
       ansible.builtin.template:
         src: updater.sh.j2
         dest: /root/njalla_updater.sh
@@ -19,7 +19,7 @@
         group: wheel
         mode: '0700'
 
-    - name: add crontab for updater script
+    - name: Add crontab for updater script
       ansible.builtin.cron:
         name: njalla updater
         minute: "0"
